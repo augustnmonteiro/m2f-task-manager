@@ -5,6 +5,7 @@ import { RealtimeProvider } from './realtime-provider';
 import { TaskPanel } from './task-panel';
 import { EmailPanel } from './email-panel';
 import { SmsPanel } from './sms-panel';
+import { EmailSummaryIntervalSelector } from './email-summary-interval-selector';
 import { signOut } from '@/server-actions/auth';
 import type { Task } from '@/lib/schemas/task';
 import type { Email } from '@/lib/schemas/email';
@@ -141,6 +142,7 @@ export function DashboardClient({
       <header className="flex items-center justify-between p-4 border-b">
         <h1 className="font-bold">Task Notifier</h1>
         <div className="flex items-center gap-4">
+          <EmailSummaryIntervalSelector currentIntervalSeconds={initialIntervalSeconds} />
           <span data-testid="signed-in-user" className="text-sm">{userEmail}</span>
           <form action={signOut}>
             <button type="submit" data-testid="logout-button" className="text-sm underline">
