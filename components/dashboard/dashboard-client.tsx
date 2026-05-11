@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { RealtimeProvider } from './realtime-provider';
 import { TaskPanel } from './task-panel';
+import { EmailPanel } from './email-panel';
+import { SmsPanel } from './sms-panel';
 import { signOut } from '@/server-actions/auth';
 import type { Task } from '@/lib/schemas/task';
 import type { Email } from '@/lib/schemas/email';
@@ -155,14 +157,16 @@ export function DashboardClient({
           onPendingChange={setPending}
           onCompletedChange={setCompleted}
         />
-        <div data-testid="emails-panel" className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">Emails</h2>
-          <p className="text-sm text-gray-400">{emails.length} messages</p>
-        </div>
-        <div data-testid="sms-panel" className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">SMS</h2>
-          <p className="text-sm text-gray-400">{smsMessages.length} messages</p>
-        </div>
+        <EmailPanel
+          emails={emails}
+          hasMore={emailHasMore}
+          onLoadMore={handleEmailLoadMore}
+        />
+        <SmsPanel
+          smsMessages={smsMessages}
+          hasMore={smsHasMore}
+          onLoadMore={handleSmsLoadMore}
+        />
       </div>
     </div>
   );
