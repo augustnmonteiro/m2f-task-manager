@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/notifications/email-summary/run",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/notifications/sms-fibonacci/run",
+      "schedule": "* * * * *"
+    }
+  ]
+}
