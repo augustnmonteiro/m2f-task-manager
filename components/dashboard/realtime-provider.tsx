@@ -57,7 +57,7 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }

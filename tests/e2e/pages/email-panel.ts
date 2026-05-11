@@ -9,7 +9,8 @@ export class EmailPanel {
     ).toBeVisible({ timeout: 10_000 });
   }
 
-  async expectSummaryEmailContaining(title: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async expectSummaryEmailContaining(_title: string) {
     await expect(
       this.page.getByTestId('email-list').getByText('Pending tasks summary'),
     ).toBeVisible({ timeout: 10_000 });
