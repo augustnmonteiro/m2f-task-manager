@@ -8,9 +8,8 @@ import {
   insertSummaryEmailRow,
   hasPendingScheduledSummary,
 } from '@/lib/domain/emails';
-import { insertSmsRow, hasPendingScheduledSms } from '@/lib/domain/sms';
+import { scheduleFirstTaskSms, cancelPendingTaskSms } from '@/lib/domain/sms';
 import { createNotificationAction } from '@/lib/domain/notification-actions';
-import { getOrCreateSchedulerState } from '@/lib/domain/scheduler';
 import { fibonacciIntervalSeconds } from '@/lib/time/fibonacci';
 import { ok, err, type ActionResult } from '@/lib/result';
 import type { Email } from '@/lib/schemas/email';
@@ -61,17 +60,14 @@ export async function createTask(
       await insertSummaryEmailRow(supabase, { userId: user.id, scheduledAt: summaryAt });
     }
 
-    if (!(await hasPendingScheduledSms(supabase, user.id))) {
-      const state = await getOrCreateSchedulerState(supabase, user.id);
-      const smsAt = new Date(
-        Date.now() + fibonacciIntervalSeconds(state.smsFibonacciIndex) * 1000,
-      ).toISOString();
-      await insertSmsRow(supabase, {
-        userId: user.id,
-        fibonacciIndex: state.smsFibonacciIndex,
-        scheduledAt: smsAt,
-      });
-    }
+    const firstSmsAt = new Date(
+      Date.now() + fibonacciIntervalSeconds(0) * 1000,
+    ).toISOString();
+    await scheduleFirstTaskSms(supabase, {
+      userId: user.id,
+      taskId: task.id,
+      scheduledAt: firstSmsAt,
+    });
 
     return ok({ task, email });
   } catch {
@@ -92,6 +88,7 @@ export async function completeTask(
 
   try {
     const task = await completeTaskDomain(supabase, user.id, parsed.data.taskId);
+    await cancelPendingTaskSms(supabase, parsed.data.taskId);
     return ok({ task });
   } catch {
     return err({ code: 'INTERNAL_ERROR', message: 'Failed to complete task.' });

@@ -110,6 +110,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
+          task_id: string | null;
           kind: 'fibonacci_summary';
           body: string | null;
           fibonacci_index: number;
@@ -120,6 +121,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id: string;
+          task_id?: string | null;
           kind?: 'fibonacci_summary';
           body?: string | null;
           fibonacci_index: number;
@@ -130,6 +132,7 @@ export type Database = {
         Update: {
           id?: string;
           user_id?: string;
+          task_id?: string | null;
           kind?: 'fibonacci_summary';
           body?: string | null;
           fibonacci_index?: number;

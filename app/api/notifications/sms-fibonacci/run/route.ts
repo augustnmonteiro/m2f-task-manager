@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { getPendingTasks } from '@/lib/domain/tasks';
-import { insertSmsRow } from '@/lib/domain/sms';
-import { updateAfterSms } from '@/lib/domain/scheduler';
+import { scheduleNextTaskSms } from '@/lib/domain/sms';
 import { fibonacciIntervalSeconds } from '@/lib/time/fibonacci';
 
 function verifyCronAuth(request: Request): boolean {
@@ -18,7 +16,8 @@ export async function POST(request: Request) {
 
   const { data: dueRows, error } = await supabase
     .from('sms_messages')
-    .select('id, user_id, fibonacci_index')
+    .select('id, user_id, task_id, fibonacci_index')
+    .not('task_id', 'is', null)
     .is('sent_at', null)
     .lte('scheduled_at', new Date().toISOString());
 
@@ -27,15 +26,27 @@ export async function POST(request: Request) {
   let processed = 0;
 
   for (const row of dueRows ?? []) {
-    const { tasks: pendingTasks } = await getPendingTasks(supabase, row.user_id);
+    const taskId = row.task_id!;
+    const now = new Date().toISOString();
 
-    const body = pendingTasks.length === 0
-      ? 'No pending tasks.'
-      : `Pending tasks: ${pendingTasks.map(t => t.title).join(', ')}`;
+    const { data: task } = await supabase
+      .from('tasks')
+      .select('title, status')
+      .eq('id', taskId)
+      .maybeSingle();
+
+    if (!task || task.status === 'completed') {
+      await supabase
+        .from('sms_messages')
+        .update({ sent_at: now })
+        .eq('id', row.id)
+        .is('sent_at', null);
+      continue;
+    }
 
     const { data: updated, error: updateErr } = await supabase
       .from('sms_messages')
-      .update({ body, sent_at: new Date().toISOString() })
+      .update({ body: task.title, sent_at: now })
       .eq('id', row.id)
       .is('sent_at', null)
       .select('id')
@@ -44,13 +55,13 @@ export async function POST(request: Request) {
     if (updateErr || !updated) continue;
 
     const newIndex = row.fibonacci_index + 1;
-    await updateAfterSms(supabase, row.user_id, newIndex);
-
     const nextAt = new Date(
       Date.now() + fibonacciIntervalSeconds(newIndex) * 1000,
     ).toISOString();
-    await insertSmsRow(supabase, {
+
+    await scheduleNextTaskSms(supabase, {
       userId: row.user_id,
+      taskId,
       fibonacciIndex: newIndex,
       scheduledAt: nextAt,
     });

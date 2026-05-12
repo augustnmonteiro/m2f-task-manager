@@ -4,6 +4,7 @@ import { UuidSchema, DatetimeSchema } from './shared';
 export const SmsSchema = z.object({
   id: UuidSchema,
   userId: UuidSchema,
+  taskId: UuidSchema.nullable(),
   kind: z.literal('fibonacci_summary'),
   body: z.string().nullable(),
   fibonacciIndex: z.number().int().min(0),

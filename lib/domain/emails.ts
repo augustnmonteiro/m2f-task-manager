@@ -77,11 +77,11 @@ export async function getPaginatedSentEmails(
     .select('*')
     .eq('user_id', userId)
     .not('sent_at', 'is', null)
-    .order('created_at', { ascending: false })
+    .order('sent_at', { ascending: false })
     .limit(limit + 1);
 
   if (cursor) {
-    query = query.lt('created_at', cursor);
+    query = query.lt('sent_at', cursor);
   }
 
   const { data, error } = await query;

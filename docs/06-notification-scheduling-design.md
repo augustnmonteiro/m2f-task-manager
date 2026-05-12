@@ -17,7 +17,7 @@ Recurring notifications are triggered by a server-side cron job, not a client-si
 |---|---|---|---|
 | Immediate email | Task added | `emails` | Added task title and action link |
 | Recurring email summary | Every 1 minute | `emails` | Current pending tasks and action links |
-| Fibonacci SMS | 1, 1, 2, 3, 5... minute intervals | `sms_messages` | Current pending tasks |
+| Fibonacci SMS | 1, 1, 2, 3, 5... minute intervals | `sms_messages` | One SMS per pending task (task title only) |
 
 ## Immediate task email
 
@@ -131,10 +131,14 @@ export function fibonacciIntervalSeconds(index: number): number {
 }
 ```
 
-### Body if tasks exist
+### Body per SMS (one SMS per pending task)
 
 ```text
-Pending tasks: Buy milk, Send invoice
+Buy milk
+```
+
+```text
+Send invoice
 ```
 
 ### Body if no tasks exist

@@ -94,8 +94,9 @@ create index if not exists emails_pending_send_idx
 create table if not exists public.sms_messages (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
+  task_id uuid references public.tasks(id) on delete cascade,
   kind public.sms_kind not null default 'fibonacci_summary',
-  body text not null check (char_length(trim(body)) > 0),
+  body text,
   fibonacci_index integer not null check (fibonacci_index >= 0),
   scheduled_at timestamptz,
   sent_at timestamptz,
@@ -106,13 +107,14 @@ create index if not exists sms_user_created_idx
   on public.sms_messages (user_id, created_at desc);
 
 -- Paginated inbox query: only sent SMS, newest first
-create index if not exists sms_user_sent_created_idx
-  on public.sms_messages (user_id, created_at desc)
+create index if not exists sms_user_sent_idx
+  on public.sms_messages (user_id, sent_at desc)
   where sent_at is not null;
 
-create unique index if not exists sms_user_scheduled_unique_idx
-  on public.sms_messages (user_id, scheduled_at)
-  where scheduled_at is not null;
+-- One row per (task, fibonacci step)
+create unique index if not exists sms_task_fibonacci_unique_idx
+  on public.sms_messages (task_id, fibonacci_index)
+  where task_id is not null;
 
 -- Cron pickup: unsent SMS that are due
 create index if not exists sms_pending_send_idx

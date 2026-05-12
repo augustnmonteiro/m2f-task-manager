@@ -9,6 +9,7 @@ function toSmsDto(row: unknown): Sms {
   return SmsSchema.parse({
     id: r.id,
     userId: r.user_id,
+    taskId: r.task_id ?? null,
     kind: r.kind,
     body: r.body ?? null,
     fibonacciIndex: r.fibonacci_index,
@@ -18,26 +19,43 @@ function toSmsDto(row: unknown): Sms {
   });
 }
 
-export async function insertSmsRow(
+export async function scheduleFirstTaskSms(
   client: Client,
-  params: {
-    userId: string;
-    fibonacciIndex: number;
-    scheduledAt: string;
-  },
-): Promise<Sms> {
-  const { data, error } = await client
-    .from('sms_messages')
-    .insert({
-      user_id: params.userId,
-      kind: 'fibonacci_summary',
-      fibonacci_index: params.fibonacciIndex,
-      scheduled_at: params.scheduledAt,
-    })
-    .select('*')
-    .single();
+  params: { userId: string; taskId: string; scheduledAt: string },
+): Promise<void> {
+  const { error } = await client.from('sms_messages').insert({
+    user_id: params.userId,
+    task_id: params.taskId,
+    kind: 'fibonacci_summary',
+    fibonacci_index: 0,
+    scheduled_at: params.scheduledAt,
+  });
   if (error) throw error;
-  return toSmsDto(data);
+}
+
+export async function scheduleNextTaskSms(
+  client: Client,
+  params: { userId: string; taskId: string; fibonacciIndex: number; scheduledAt: string },
+): Promise<void> {
+  const { error } = await client.from('sms_messages').insert({
+    user_id: params.userId,
+    task_id: params.taskId,
+    kind: 'fibonacci_summary',
+    fibonacci_index: params.fibonacciIndex,
+    scheduled_at: params.scheduledAt,
+  });
+  if (error) throw error;
+}
+
+export async function cancelPendingTaskSms(
+  client: Client,
+  taskId: string,
+): Promise<void> {
+  await client
+    .from('sms_messages')
+    .delete()
+    .eq('task_id', taskId)
+    .is('sent_at', null);
 }
 
 export async function getPaginatedSentSms(
@@ -51,10 +69,10 @@ export async function getPaginatedSentSms(
     .select('*')
     .eq('user_id', userId)
     .not('sent_at', 'is', null)
-    .order('created_at', { ascending: false })
+    .order('sent_at', { ascending: false })
     .limit(limit + 1);
 
-  if (cursor) query = query.lt('created_at', cursor);
+  if (cursor) query = query.lt('sent_at', cursor);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -64,16 +82,4 @@ export async function getPaginatedSentSms(
     smsMessages: rows.slice(0, limit).map(toSmsDto),
     hasMore: rows.length > limit,
   };
-}
-
-export async function hasPendingScheduledSms(
-  client: Client,
-  userId: string,
-): Promise<boolean> {
-  const { count } = await client
-    .from('sms_messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .is('sent_at', null);
-  return (count ?? 0) > 0;
 }

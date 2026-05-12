@@ -108,6 +108,7 @@ export function DashboardClient({
     const mapped: Sms = {
       id,
       userId: row.user_id as string,
+      taskId: (row.task_id as string | null) ?? null,
       kind: 'fibonacci_summary',
       body: (row.body as string | null) ?? null,
       fibonacciIndex: row.fibonacci_index as number,
@@ -164,7 +165,7 @@ export function DashboardClient({
   }, []);
 
   return (
-    <div data-testid="dashboard" className="min-h-screen bg-slate-50">
+    <div data-testid="dashboard" className="flex min-h-screen flex-col bg-slate-50 xl:h-screen xl:overflow-hidden">
       <RealtimeProvider
         userId={userId}
         onTaskChange={handleTaskChange}
@@ -205,8 +206,8 @@ export function DashboardClient({
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl grid grid-cols-1 gap-4 p-4 sm:p-6 xl:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mx-auto min-h-0 w-full max-w-7xl flex-1 grid grid-cols-1 gap-4 p-4 sm:p-6 xl:grid-cols-3 xl:grid-rows-[1fr] xl:overflow-hidden">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <TaskPanel
             initialPending={pending}
             totalPendingCount={totalPendingCount}
@@ -220,14 +221,14 @@ export function DashboardClient({
             onEmailCreated={handleEmailCreated}
           />
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <EmailPanel
             emails={emails}
             hasMore={emailHasMore}
             onLoadMore={handleEmailLoadMore}
           />
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <SmsPanel
             smsMessages={smsMessages}
             hasMore={smsHasMore}
