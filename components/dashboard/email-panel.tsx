@@ -90,7 +90,7 @@ export function EmailPanel({ emails, totalCount, hasMore, onLoadMore }: Props) {
               className="text-xs text-slate-400"
               suppressHydrationWarning
             >
-              {formatTimestamp(email.createdAt)}
+              {formatTimestamp(email.sentAt ?? email.createdAt)}
             </p>
             {email.body && (
               <div

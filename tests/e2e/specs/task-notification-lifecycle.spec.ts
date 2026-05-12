@@ -1,12 +1,12 @@
-import { test } from '@playwright/test';
+import { test } from '../fixtures';
 import { AuthPage } from '../pages/auth-page';
 import { DashboardPage } from '../pages/dashboard-page';
-import { uniqueEmail, testPassword } from '../fixtures/test-users';
+import { testPassword } from '../fixtures/test-users';
 
-test('add task → immediate email appears → SMS appears after trigger', async ({ page }) => {
+test('add task → immediate email appears → SMS appears after trigger', async ({ page, email }) => {
   const auth = new AuthPage(page);
   await auth.goto();
-  await auth.signUp(uniqueEmail(), testPassword);
+  await auth.signUp(email, testPassword);
 
   const dashboard = new DashboardPage(page);
   await dashboard.expectVisible();

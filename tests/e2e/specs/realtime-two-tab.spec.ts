@@ -1,14 +1,13 @@
-import { test } from '@playwright/test';
+import { test } from '../fixtures';
 import { AuthPage } from '../pages/auth-page';
 import { DashboardPage } from '../pages/dashboard-page';
-import { uniqueEmail, testPassword } from '../fixtures/test-users';
+import { testPassword } from '../fixtures/test-users';
 
-test('two tabs stay synchronized through realtime', async ({ browser }) => {
+test('two tabs stay synchronized through realtime', async ({ browser, email }) => {
   const context = await browser.newContext();
   const pageA = await context.newPage();
   const pageB = await context.newPage();
 
-  const email = uniqueEmail();
   const auth = new AuthPage(pageA);
   await auth.goto();
   await auth.signUp(email, testPassword);
