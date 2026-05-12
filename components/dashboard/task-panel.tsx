@@ -319,7 +319,7 @@ export function TaskPanel({
                   ) : (
                     <>
                       <p data-testid={`pending-task-title-${task.id}`} className="text-sm font-medium text-slate-800 break-words">{task.title}</p>
-                      <p data-testid={`pending-task-age-${task.id}`} className="mt-0.5 text-xs text-slate-400">{relativeAge(task.createdAt)}</p>
+                      <p data-testid={`pending-task-age-${task.id}`} className="mt-0.5 text-xs text-slate-400" suppressHydrationWarning>{relativeAge(task.createdAt)}</p>
                     </>
                   )}
                 </div>
@@ -419,7 +419,7 @@ export function TaskPanel({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-slate-400 line-through break-words">{task.title}</p>
-                <p className="mt-0.5 text-xs text-slate-400">{formatTimestamp(task.completedAt!)}</p>
+                <p className="mt-0.5 text-xs text-slate-400" suppressHydrationWarning>{formatTimestamp(task.completedAt!)}</p>
               </div>
             </div>
           ))}

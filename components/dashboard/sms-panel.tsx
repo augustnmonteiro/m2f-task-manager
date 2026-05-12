@@ -65,7 +65,7 @@ export function SmsPanel({ smsMessages, totalCount, hasMore, onLoadMore }: Props
               <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                 Fibonacci #{sms.fibonacciIndex}
               </span>
-              <p data-testid={`sms-timestamp-${sms.id}`} className="text-xs text-slate-400">
+              <p data-testid={`sms-timestamp-${sms.id}`} className="text-xs text-slate-400" suppressHydrationWarning>
                 {formatTimestamp(sms.createdAt)}
               </p>
             </div>

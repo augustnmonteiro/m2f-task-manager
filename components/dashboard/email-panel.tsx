@@ -88,6 +88,7 @@ export function EmailPanel({ emails, totalCount, hasMore, onLoadMore }: Props) {
             <p
               data-testid={`email-timestamp-${email.id}`}
               className="text-xs text-slate-400"
+              suppressHydrationWarning
             >
               {formatTimestamp(email.createdAt)}
             </p>
