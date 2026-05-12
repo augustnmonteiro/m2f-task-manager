@@ -47,7 +47,7 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'emails', filter: `user_id=eq.${userId}` },
+        { event: '*', schema: 'public', table: 'emails', filter: `user_id=eq.${userId}` },
         (payload) => {
           console.log('[Realtime] emails event:', payload);
           handlersRef.current.onEmailUpdate(payload.new as Record<string, unknown>);
@@ -55,7 +55,7 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'sms_messages', filter: `user_id=eq.${userId}` },
+        { event: '*', schema: 'public', table: 'sms_messages', filter: `user_id=eq.${userId}` },
         (payload) => {
           console.log('[Realtime] sms_messages event:', payload);
           handlersRef.current.onSmsUpdate(payload.new as Record<string, unknown>);
