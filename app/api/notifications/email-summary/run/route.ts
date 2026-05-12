@@ -5,6 +5,7 @@ import { createNotificationAction } from '@/lib/domain/notification-actions';
 import { insertSummaryEmailRow } from '@/lib/domain/emails';
 import { updateAfterEmailSummary } from '@/lib/domain/scheduler';
 import { buildEmailHtml } from '@/lib/email/template';
+import { formatTimestamp } from '@/lib/time/format';
 
 function verifyCronAuth(request: Request): boolean {
   const auth = request.headers.get('authorization');
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
     const body = buildEmailHtml({
       type: 'digest',
-      tasks: pendingTasks.map(t => ({ title: t.title })),
+      tasks: pendingTasks.map(t => ({ title: t.title, createdAt: formatTimestamp(t.createdAt) })),
     });
 
     const { data: updated, error: updateErr } = await supabase

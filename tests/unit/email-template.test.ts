@@ -44,16 +44,34 @@ describe('buildEmailHtml', () => {
     it('contains all task titles', () => {
       const html = buildEmailHtml({
         type: 'digest',
-        tasks: [{ title: 'Task Alpha' }, { title: 'Task Beta' }],
+        tasks: [
+          { title: 'Task Alpha', createdAt: 'Jan 1, 2026, 9:00 AM' },
+          { title: 'Task Beta', createdAt: 'Jan 2, 2026, 10:00 AM' },
+        ],
       });
       expect(html).toContain('Task Alpha');
       expect(html).toContain('Task Beta');
     });
 
+    it('contains createdAt for each task', () => {
+      const html = buildEmailHtml({
+        type: 'digest',
+        tasks: [
+          { title: 'Task Alpha', createdAt: 'Jan 1, 2026, 9:00 AM' },
+          { title: 'Task Beta', createdAt: 'Jan 2, 2026, 10:00 AM' },
+        ],
+      });
+      expect(html).toContain('Jan 1, 2026, 9:00 AM');
+      expect(html).toContain('Jan 2, 2026, 10:00 AM');
+    });
+
     it('renders one list item per task', () => {
       const html = buildEmailHtml({
         type: 'digest',
-        tasks: [{ title: 'Task Alpha' }, { title: 'Task Beta' }],
+        tasks: [
+          { title: 'Task Alpha', createdAt: 'Jan 1, 2026, 9:00 AM' },
+          { title: 'Task Beta', createdAt: 'Jan 2, 2026, 10:00 AM' },
+        ],
       });
       expect(html.match(/<li/g)?.length).toBe(2);
     });
@@ -61,7 +79,7 @@ describe('buildEmailHtml', () => {
     it('does not contain Tailwind class names', () => {
       const html = buildEmailHtml({
         type: 'digest',
-        tasks: [{ title: 'Task Alpha' }],
+        tasks: [{ title: 'Task Alpha', createdAt: 'Jan 1, 2026, 9:00 AM' }],
       });
       expect(html).not.toContain('class=');
     });
