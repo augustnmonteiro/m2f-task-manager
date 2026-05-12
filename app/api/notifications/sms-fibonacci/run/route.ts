@@ -36,11 +36,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!task || task.status === 'completed') {
-      await supabase
-        .from('sms_messages')
-        .update({ sent_at: now })
-        .eq('id', row.id)
-        .is('sent_at', null);
+      await supabase.from('sms_messages').delete().eq('id', row.id);
       continue;
     }
 

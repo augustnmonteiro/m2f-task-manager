@@ -102,6 +102,8 @@ export function EmailPanel({ emails, totalCount, hasMore, onLoadMore }: Props) {
               <a
                 key={action.id}
                 href={action.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 data-testid={`email-complete-action-${action.taskId}`}
                 aria-label={`Complete task from email ${email.subject}`}
                 className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"

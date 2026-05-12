@@ -27,8 +27,8 @@ const DONE_BTN = 'display:inline-block;margin-top:10px;padding:6px 14px;backgrou
 function card(label: string, body: string): string {
   return (
     `<div style="${CARD}">` +
-      `<div style="${HEADER}"><span style="${HEADER_LABEL}">${label}</span></div>` +
-      body +
+    `<div style="${HEADER}"><span style="${HEADER_LABEL}">${label}</span></div>` +
+    body +
     `</div>`
   );
 }
@@ -38,9 +38,9 @@ export function buildEmailHtml(input: EmailInput): string {
     return card(
       'New Task Added',
       `<div style="${BODY}">` +
-        `<p style="${TITLE}">${input.title}</p>` +
-        `<p style="${META}">Created ${input.createdAt}</p>` +
-      (input.actionUrl ? `<a href="${input.actionUrl}" style="${DONE_BTN}">Done</a>` : '') +
+      `<p style="${TITLE}">${input.title}</p>` +
+      `<p style="${META}">Created ${input.createdAt}</p>` +
+      (input.actionUrl ? `<a href="${input.actionUrl}" style="${DONE_BTN}" target="_blank" rel="noopener noreferrer">Done</a>` : '') +
       `</div>`,
     );
   }
@@ -55,9 +55,9 @@ export function buildEmailHtml(input: EmailInput): string {
   const items = input.tasks
     .map(t =>
       `<li style="${LIST_ITEM}">` +
-        `<p style="${ITEM_TITLE}">${t.title}</p>` +
-        `<p style="${META}">Created ${t.createdAt}</p>` +
-      (t.actionUrl ? `<a href="${t.actionUrl}" style="${DONE_BTN}">Done</a>` : '') +
+      `<p style="${ITEM_TITLE}">${t.title}</p>` +
+      `<p style="${META}">Created ${t.createdAt}</p>` +
+      (t.actionUrl ? `<a href="${t.actionUrl}" style="${DONE_BTN}" target="_blank" rel="noopener noreferrer">Done</a>` : '') +
       `</li>`
     )
     .join('');
