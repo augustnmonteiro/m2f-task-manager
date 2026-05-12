@@ -1,5 +1,4 @@
-export function uniqueEmail(): string {
-  return `e2e+${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`;
-}
-
+// Seeded test user — present in local/CI Supabase via seed.sql.
+// For hosted Supabase the fixture creates this user on first run.
+export const testUserEmail = 'e2e@test.local';
 export const testPassword = 'TestPassword123!';

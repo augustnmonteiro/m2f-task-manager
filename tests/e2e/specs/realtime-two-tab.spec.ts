@@ -10,7 +10,7 @@ test('two tabs stay synchronized through realtime', async ({ browser, email }) =
 
   const auth = new AuthPage(pageA);
   await auth.goto();
-  await auth.signUp(email, testPassword);
+  await auth.login(email, testPassword);
 
   const dashboardA = new DashboardPage(pageA);
   await dashboardA.expectVisible();

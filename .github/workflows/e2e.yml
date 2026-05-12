@@ -33,6 +33,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${ANON_KEY}
           SUPABASE_SECRET_KEY=${SERVICE_KEY}
           ACTION_TOKEN_SECRET=e2e-ci-test-secret-minimum-32-chars-x
+          EMAIL_JWT_SECRET=e2e-ci-email-jwt-secret-minimum-32-chars
+          CRON_SECRET=e2e-ci-cron-secret-minimum-32-chars-xx
           NEXT_PUBLIC_NOTIFICATION_TIME_SCALE=60
           E2E_TEST_MODE=false
           EOF

@@ -6,7 +6,7 @@ import { testPassword } from '../fixtures/test-users';
 test('add task → immediate email appears → SMS appears after trigger', async ({ page, email }) => {
   const auth = new AuthPage(page);
   await auth.goto();
-  await auth.signUp(email, testPassword);
+  await auth.login(email, testPassword);
 
   const dashboard = new DashboardPage(page);
   await dashboard.expectVisible();

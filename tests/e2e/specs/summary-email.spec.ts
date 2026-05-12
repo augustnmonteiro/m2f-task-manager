@@ -6,7 +6,7 @@ import { testPassword } from '../fixtures/test-users';
 test('summary email contains pending task and completion action', async ({ page, email }) => {
   const auth = new AuthPage(page);
   await auth.goto();
-  await auth.signUp(email, testPassword);
+  await auth.login(email, testPassword);
 
   const dashboard = new DashboardPage(page);
   const title = `Summary task ${Date.now()}`;
