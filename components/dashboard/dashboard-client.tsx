@@ -192,7 +192,7 @@ export function DashboardClient({
         </div>
         <div className="flex items-center gap-4">
           <EmailSummaryIntervalSelector currentIntervalSeconds={initialIntervalSeconds} />
-          <button
+          {/* <button
             type="button"
             onClick={handleTriggerNotifications}
             disabled={isTriggering}
@@ -200,7 +200,7 @@ export function DashboardClient({
             className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
           >
             {isTriggering ? 'Sending…' : 'Run notifications'}
-          </button>
+          </button> */}
           <span data-testid="signed-in-user" className="hidden text-xs text-slate-500 sm:block">{userEmail}</span>
           <form action={signOut}>
             <button
