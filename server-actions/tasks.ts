@@ -23,10 +23,16 @@ import { scheduleFirstTaskSms, cancelPendingTaskSms } from '@/lib/domain/sms';
 import { createNotificationAction } from '@/lib/domain/notification-actions';
 import { fibonacciIntervalSeconds } from '@/lib/time/fibonacci';
 import { ok, err, type ActionResult } from '@/lib/result';
+import { env } from '@/lib/env';
 import type { Email } from '@/lib/schemas/email';
 import { formatTimestamp } from '@/lib/time/format';
 import { buildEmailHtml } from '@/lib/email/template';
 import { signTaskJwt } from '@/lib/email/jwt';
+
+function scheduleDelay(seconds: number): string {
+  const delay = env.E2E_TEST_MODE === 'true' ? 0 : seconds * 1000;
+  return new Date(Date.now() + delay).toISOString();
+}
 
 export async function createTask(
   input: unknown,
@@ -72,13 +78,11 @@ export async function createTask(
         .eq('id', user.id)
         .maybeSingle();
       const intervalSec = profile?.email_summary_interval_seconds ?? 60;
-      const summaryAt = new Date(Date.now() + intervalSec * 1000).toISOString();
+      const summaryAt = scheduleDelay(intervalSec);
       await insertSummaryEmailRow(supabase, { userId: user.id, scheduledAt: summaryAt });
     }
 
-    const firstSmsAt = new Date(
-      Date.now() + fibonacciIntervalSeconds(0) * 1000,
-    ).toISOString();
+    const firstSmsAt = scheduleDelay(fibonacciIntervalSeconds(0));
     await scheduleFirstTaskSms(supabase, {
       userId: user.id,
       taskId: task.id,

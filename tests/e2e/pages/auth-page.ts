@@ -11,7 +11,7 @@ export class AuthPage {
     await this.page.getByRole('button', { name: /sign up/i }).click();
     await this.page.getByLabel('Email').fill(email);
     await this.page.getByLabel('Password').fill(password);
-    await this.page.getByRole('button', { name: /sign up/i }).click();
+    await this.page.getByRole('button', { name: /create account/i }).click();
   }
 
   async login(email: string, password: string) {

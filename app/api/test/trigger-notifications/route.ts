@@ -6,8 +6,8 @@ export async function POST(request: Request) {
   const headers = { Authorization: `Bearer ${env.CRON_SECRET}` };
 
   const [emailRes, smsRes] = await Promise.all([
-    fetch(`${base}/api/notifications/email-summary/run`, { method: 'POST', headers }),
-    fetch(`${base}/api/notifications/sms-fibonacci/run`, { method: 'POST', headers }),
+    fetch(`${base}/api/notifications/email-summary/run`, { method: 'GET', headers }),
+    fetch(`${base}/api/notifications/sms-fibonacci/run`, { method: 'GET', headers }),
   ]);
 
   return NextResponse.json({
