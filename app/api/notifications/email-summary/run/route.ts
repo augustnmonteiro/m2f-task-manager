@@ -4,6 +4,7 @@ import { getPendingTasks } from '@/lib/domain/tasks';
 import { createNotificationAction } from '@/lib/domain/notification-actions';
 import { insertSummaryEmailRow } from '@/lib/domain/emails';
 import { updateAfterEmailSummary } from '@/lib/domain/scheduler';
+import { buildEmailHtml } from '@/lib/email/template';
 
 function verifyCronAuth(request: Request): boolean {
   const auth = request.headers.get('authorization');
@@ -31,9 +32,10 @@ export async function POST(request: Request) {
   for (const row of dueRows ?? []) {
     const { tasks: pendingTasks } = await getPendingTasks(supabase, row.user_id);
 
-    const body = pendingTasks.length === 0
-      ? '<div><p>No pending tasks.</p></div>'
-      : `<div class="space-y-1"><p class="font-medium text-slate-800">Pending tasks:</p><ul class="list-disc pl-5 space-y-1">${pendingTasks.map(t => `<li>${t.title}</li>`).join('')}</ul></div>`;
+    const body = buildEmailHtml({
+      type: 'digest',
+      tasks: pendingTasks.map(t => ({ title: t.title })),
+    });
 
     const { data: updated, error: updateErr } = await supabase
       .from('emails')
