@@ -96,4 +96,39 @@ describe('buildEmailHtml', () => {
       expect(html).not.toContain('<li');
     });
   });
+
+  describe('Done button', () => {
+    it('renders Done button in task email when actionUrl is provided', () => {
+      const html = buildEmailHtml({
+        type: 'task',
+        title: 'Buy groceries',
+        createdAt: 'Jan 1, 2026, 12:00 PM',
+        actionUrl: 'https://example.com/api/email-actions/complete-task-jwt?token=abc',
+      });
+      expect(html).toContain('https://example.com/api/email-actions/complete-task-jwt?token=abc');
+      expect(html).toContain('Done');
+    });
+
+    it('omits Done button in task email when actionUrl is absent', () => {
+      const html = buildEmailHtml({
+        type: 'task',
+        title: 'Buy groceries',
+        createdAt: 'Jan 1, 2026, 12:00 PM',
+      });
+      expect(html).not.toContain('Done');
+    });
+
+    it('renders Done button per task in digest when actionUrl is provided', () => {
+      const html = buildEmailHtml({
+        type: 'digest',
+        tasks: [
+          { title: 'Task A', createdAt: 'Jan 1, 2026', actionUrl: 'https://example.com/complete?token=x' },
+          { title: 'Task B', createdAt: 'Jan 2, 2026', actionUrl: 'https://example.com/complete?token=y' },
+        ],
+      });
+      expect(html).toContain('token=x');
+      expect(html).toContain('token=y');
+      expect(html.match(/Done/g)?.length).toBe(2);
+    });
+  });
 });
