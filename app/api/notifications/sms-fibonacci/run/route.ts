@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     const { data: task } = await supabase
       .from('tasks')
-      .select('title, status')
+      .select('title, status, created_at')
       .eq('id', taskId)
       .maybeSingle();
 
@@ -44,9 +44,12 @@ export async function POST(request: Request) {
       continue;
     }
 
+    const code = Math.floor(100000 + Math.random() * 900000);
+    const smsBody = `${task.title}\nCreated at: ${new Date(task.created_at).toLocaleString('en-US')}\nReply DONE-${code} for this task to be marked as done`;
+
     const { data: updated, error: updateErr } = await supabase
       .from('sms_messages')
-      .update({ body: task.title, sent_at: now })
+      .update({ body: smsBody, sent_at: now })
       .eq('id', row.id)
       .is('sent_at', null)
       .select('id')

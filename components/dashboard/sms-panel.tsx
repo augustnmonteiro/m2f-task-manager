@@ -70,7 +70,7 @@ export function SmsPanel({ smsMessages, totalCount, hasMore, onLoadMore }: Props
               </p>
             </div>
             {sms.body && (
-              <p data-testid={`sms-body-${sms.id}`} className="text-sm text-slate-700 border-t border-slate-100 pt-1.5">
+              <p data-testid={`sms-body-${sms.id}`} className="text-sm text-slate-700 border-t border-slate-100 pt-1.5 whitespace-pre-wrap">
                 {sms.body}
               </p>
             )}
