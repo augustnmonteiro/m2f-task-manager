@@ -26,6 +26,7 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${userId}` },
         (payload) => {
+          console.log('[Realtime] tasks event:', payload);
           const { eventType, new: newRow, old: oldRow } = payload as {
             eventType: 'INSERT' | 'UPDATE' | 'DELETE';
             new: Record<string, unknown>;
@@ -47,14 +48,22 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'emails', filter: `user_id=eq.${userId}` },
-        (payload) => handlersRef.current.onEmailUpdate(payload.new as Record<string, unknown>),
+        (payload) => {
+          console.log('[Realtime] emails event:', payload);
+          handlersRef.current.onEmailUpdate(payload.new as Record<string, unknown>);
+        },
       )
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'sms_messages', filter: `user_id=eq.${userId}` },
-        (payload) => handlersRef.current.onSmsUpdate(payload.new as Record<string, unknown>),
+        (payload) => {
+          console.log('[Realtime] sms_messages event:', payload);
+          handlersRef.current.onSmsUpdate(payload.new as Record<string, unknown>);
+        },
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[Realtime] status:', status, err ?? '');
+      });
 
     return () => { supabase.removeChannel(channel); };
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
