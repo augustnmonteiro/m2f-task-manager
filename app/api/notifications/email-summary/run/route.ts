@@ -13,7 +13,7 @@ function verifyCronAuth(request: Request): boolean {
   return auth === `Bearer ${process.env.CRON_SECRET}`;
 }
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   if (!verifyCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
