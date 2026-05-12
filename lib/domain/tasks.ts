@@ -17,26 +17,44 @@ function toTaskDto(row: unknown): Task {
   });
 }
 
-export async function getPendingTasks(client: Client, userId: string): Promise<Task[]> {
-  const { data, error } = await client
+export async function getPendingTasks(
+  client: Client,
+  userId: string,
+  cursor?: string,
+  limit = 20,
+): Promise<{ tasks: Task[]; hasMore: boolean }> {
+  let query = client
     .from('tasks')
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'pending')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(limit + 1);
+  if (cursor) query = query.lt('created_at', cursor);
+  const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []).map(toTaskDto);
+  const rows = data ?? [];
+  return { tasks: rows.slice(0, limit).map(toTaskDto), hasMore: rows.length > limit };
 }
 
-export async function getCompletedTasks(client: Client, userId: string): Promise<Task[]> {
-  const { data, error } = await client
+export async function getCompletedTasks(
+  client: Client,
+  userId: string,
+  cursor?: string,
+  limit = 20,
+): Promise<{ tasks: Task[]; hasMore: boolean }> {
+  let query = client
     .from('tasks')
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'completed')
-    .order('completed_at', { ascending: false });
+    .order('completed_at', { ascending: false })
+    .limit(limit + 1);
+  if (cursor) query = query.lt('completed_at', cursor);
+  const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []).map(toTaskDto);
+  const rows = data ?? [];
+  return { tasks: rows.slice(0, limit).map(toTaskDto), hasMore: rows.length > limit };
 }
 
 export async function insertTask(

@@ -29,37 +29,50 @@ export function SmsPanel({ smsMessages, hasMore, onLoadMore }: Props) {
   }, [smsMessages, hasMore, loading, onLoadMore]);
 
   return (
-    <section aria-labelledby="sms-heading" data-testid="sms-panel" className="flex flex-col gap-2">
-      <h2 id="sms-heading" className="text-lg font-semibold">
-        SMS <span className="text-sm font-normal text-gray-500">({smsMessages.length})</span>
-      </h2>
+    <section aria-labelledby="sms-heading" data-testid="sms-panel" className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h2 id="sms-heading" className="text-base font-semibold text-slate-900">SMS</h2>
+        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+          {smsMessages.length}
+        </span>
+      </div>
 
       <div data-testid="sms-list" className="flex flex-col gap-2 overflow-y-auto max-h-[60vh]">
         {smsMessages.length === 0 && (
-          <p className="text-sm text-gray-400">
-            No SMS messages yet. The first SMS arrives after the first Fibonacci interval.
-          </p>
+          <div className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center">
+            <svg className="mx-auto mb-2 text-slate-300" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3" />
+            </svg>
+            <p className="text-sm text-slate-400">No SMS yet. First one arrives after the Fibonacci interval.</p>
+          </div>
         )}
         {smsMessages.map(sms => (
           <div
             key={sms.id}
             data-testid={`sms-card-${sms.id}`}
-            className="border rounded p-3 flex flex-col gap-1"
+            className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col gap-1.5"
           >
-            <p data-testid={`sms-timestamp-${sms.id}`} className="text-xs text-gray-400">
-              {formatTimestamp(sms.createdAt)}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                Fibonacci #{sms.fibonacciIndex}
+              </span>
+              <p data-testid={`sms-timestamp-${sms.id}`} className="text-xs text-slate-400">
+                {formatTimestamp(sms.createdAt)}
+              </p>
+            </div>
             {sms.body && (
-              <p data-testid={`sms-body-${sms.id}`} className="text-sm">
+              <p data-testid={`sms-body-${sms.id}`} className="text-sm text-slate-700 border-t border-slate-100 pt-1.5">
                 {sms.body}
               </p>
             )}
           </div>
         ))}
         <div ref={sentinelRef} className="h-1" />
-        {loading && <p className="text-xs text-gray-400 text-center">Loading…</p>}
+        {loading && (
+          <p className="text-xs text-slate-400 text-center py-2">Loading…</p>
+        )}
         {!hasMore && smsMessages.length > 0 && (
-          <p className="text-xs text-gray-400 text-center">No more messages.</p>
+          <p className="text-xs text-slate-300 text-center py-2">All messages loaded</p>
         )}
       </div>
     </section>

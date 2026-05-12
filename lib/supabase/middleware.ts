@@ -22,6 +22,9 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const { error } = await supabase.auth.getUser();
+  if (error?.code === 'refresh_token_not_found') {
+    await supabase.auth.signOut();
+  }
   return supabaseResponse;
 }

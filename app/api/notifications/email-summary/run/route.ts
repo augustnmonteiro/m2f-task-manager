@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
 import { getPendingTasks } from '@/lib/domain/tasks';
 import { createNotificationAction } from '@/lib/domain/notification-actions';
 import { insertSummaryEmailRow } from '@/lib/domain/emails';
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = await createServerClient();
+  const supabase = createServiceClient();
 
   const { data: dueRows, error } = await supabase
     .from('emails')
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   let processed = 0;
 
   for (const row of dueRows ?? []) {
-    const pendingTasks = await getPendingTasks(supabase, row.user_id);
+    const { tasks: pendingTasks } = await getPendingTasks(supabase, row.user_id);
 
     const body = pendingTasks.length === 0
       ? 'No pending tasks.'

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useTransition } from 'react';
 import { RealtimeProvider } from './realtime-provider';
 import { TaskPanel } from './task-panel';
 import { EmailPanel } from './email-panel';
@@ -15,7 +15,10 @@ interface Props {
   userId: string;
   userEmail: string;
   initialPending: Task[];
+  totalPendingCount: number;
+  hasMorePending: boolean;
   initialCompleted: Task[];
+  hasMoreCompleted: boolean;
   initialEmails: Email[];
   initialSms: Sms[];
   hasMoreEmails: boolean;
@@ -27,7 +30,10 @@ export function DashboardClient({
   userId,
   userEmail,
   initialPending,
+  totalPendingCount,
+  hasMorePending,
   initialCompleted,
+  hasMoreCompleted,
   initialEmails,
   initialSms,
   hasMoreEmails,
@@ -43,6 +49,7 @@ export function DashboardClient({
 
   const emailIdSet = useRef(new Set(initialEmails.map(e => e.id)));
   const smsIdSet = useRef(new Set(initialSms.map(s => s.id)));
+  const [isTriggering, startTrigger] = useTransition();
 
   const handleTaskChange = useCallback((task: Task, eventType: 'INSERT' | 'UPDATE' | 'DELETE') => {
     if (eventType === 'DELETE') {
@@ -112,6 +119,20 @@ export function DashboardClient({
     setSmsMessages(prev => [mapped, ...prev]);
   }, []);
 
+  const handlePendingLoadMore = useCallback(async (cursor: string): Promise<{ tasks: Task[]; hasMore: boolean }> => {
+    const res = await fetch(`/api/tasks?status=pending&cursor=${encodeURIComponent(cursor)}&limit=20`);
+    if (!res.ok) return { tasks: [], hasMore: true };
+    const data = await res.json();
+    return { tasks: data.tasks ?? [], hasMore: data.hasMore ?? false };
+  }, []);
+
+  const handleCompletedLoadMore = useCallback(async (cursor: string): Promise<{ tasks: Task[]; hasMore: boolean }> => {
+    const res = await fetch(`/api/tasks?status=completed&cursor=${encodeURIComponent(cursor)}&limit=20`);
+    if (!res.ok) return { tasks: [], hasMore: true };
+    const data = await res.json();
+    return { tasks: data.tasks ?? [], hasMore: data.hasMore ?? false };
+  }, []);
+
   const handleEmailLoadMore = useCallback(async (cursor: string) => {
     const res = await fetch(`/api/notifications/emails?cursor=${encodeURIComponent(cursor)}&limit=20`);
     const data = await res.json();
@@ -120,6 +141,18 @@ export function DashboardClient({
     setEmails(prev => [...prev, ...fresh]);
     setEmailHasMore(data.hasMore);
   }, []);
+
+  const handleEmailCreated = useCallback((email: Email) => {
+    if (emailIdSet.current.has(email.id)) return;
+    emailIdSet.current.add(email.id);
+    setEmails(prev => [email, ...prev]);
+  }, []);
+
+  function handleTriggerNotifications() {
+    startTrigger(async () => {
+      await fetch('/api/test/trigger-notifications', { method: 'POST' });
+    });
+  }
 
   const handleSmsLoadMore = useCallback(async (cursor: string) => {
     const res = await fetch(`/api/notifications/sms?cursor=${encodeURIComponent(cursor)}&limit=20`);
@@ -131,7 +164,7 @@ export function DashboardClient({
   }, []);
 
   return (
-    <div data-testid="dashboard">
+    <div data-testid="dashboard" className="min-h-screen bg-slate-50">
       <RealtimeProvider
         userId={userId}
         onTaskChange={handleTaskChange}
@@ -139,36 +172,68 @@ export function DashboardClient({
         onSmsUpdate={handleSmsUpdate}
       />
 
-      <header className="flex items-center justify-between p-4 border-b">
-        <h1 className="font-bold">Task Notifier</h1>
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-3 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h1 className="text-sm font-semibold text-slate-900">Task Notifier</h1>
+        </div>
         <div className="flex items-center gap-4">
           <EmailSummaryIntervalSelector currentIntervalSeconds={initialIntervalSeconds} />
-          <span data-testid="signed-in-user" className="text-sm">{userEmail}</span>
+          <button
+            type="button"
+            onClick={handleTriggerNotifications}
+            disabled={isTriggering}
+            data-testid="trigger-notifications-button"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+          >
+            {isTriggering ? 'Sending…' : 'Run notifications'}
+          </button>
+          <span data-testid="signed-in-user" className="hidden text-xs text-slate-500 sm:block">{userEmail}</span>
           <form action={signOut}>
-            <button type="submit" data-testid="logout-button" className="text-sm underline">
+            <button
+              type="submit"
+              data-testid="logout-button"
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+            >
               Log out
             </button>
           </form>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 p-4 xl:grid-cols-3">
-        <TaskPanel
-          initialPending={pending}
-          initialCompleted={completed}
-          onPendingChange={setPending}
-          onCompletedChange={setCompleted}
-        />
-        <EmailPanel
-          emails={emails}
-          hasMore={emailHasMore}
-          onLoadMore={handleEmailLoadMore}
-        />
-        <SmsPanel
-          smsMessages={smsMessages}
-          hasMore={smsHasMore}
-          onLoadMore={handleSmsLoadMore}
-        />
+      <div className="mx-auto max-w-7xl grid grid-cols-1 gap-4 p-4 sm:p-6 xl:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <TaskPanel
+            initialPending={pending}
+            totalPendingCount={totalPendingCount}
+            hasMorePending={hasMorePending}
+            onPendingLoadMore={handlePendingLoadMore}
+            initialCompleted={completed}
+            hasMoreCompleted={hasMoreCompleted}
+            onCompletedLoadMore={handleCompletedLoadMore}
+            onPendingChange={setPending}
+            onCompletedChange={setCompleted}
+            onEmailCreated={handleEmailCreated}
+          />
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <EmailPanel
+            emails={emails}
+            hasMore={emailHasMore}
+            onLoadMore={handleEmailLoadMore}
+          />
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <SmsPanel
+            smsMessages={smsMessages}
+            hasMore={smsHasMore}
+            onLoadMore={handleSmsLoadMore}
+          />
+        </div>
       </div>
     </div>
   );

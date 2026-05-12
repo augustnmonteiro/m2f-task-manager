@@ -11,7 +11,7 @@ export function relativeAge(isoDatetime: string): string {
 }
 
 export function formatTimestamp(isoDatetime: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(isoDatetime));

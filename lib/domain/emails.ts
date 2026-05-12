@@ -30,6 +30,7 @@ export async function insertImmediateEmail(
     scheduledAt: string;
   },
 ): Promise<Email> {
+  const now = new Date().toISOString();
   const { data, error } = await client
     .from('emails')
     .insert({
@@ -39,6 +40,7 @@ export async function insertImmediateEmail(
       subject: params.subject,
       body: params.body,
       scheduled_at: params.scheduledAt,
+      sent_at: now,
     })
     .select('*')
     .single();

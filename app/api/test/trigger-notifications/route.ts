@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import { env } from '@/lib/env';
 
 export async function POST(request: Request) {
-  if (env.E2E_TEST_MODE !== 'true') {
-    return NextResponse.json({ error: 'Not available' }, { status: 404 });
-  }
-
   const base = new URL(request.url).origin;
   const headers = { Authorization: `Bearer ${env.CRON_SECRET}` };
 
