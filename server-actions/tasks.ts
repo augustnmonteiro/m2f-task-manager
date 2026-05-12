@@ -39,7 +39,7 @@ export async function createTask(
       userId: user.id,
       taskId: task.id,
       subject: `Task added: ${task.title}`,
-      body: `A new task was added: ${task.title}.\nCreated at: ${formatTimestamp(task.createdAt)}.`,
+      body: `<div class="space-y-1"><p>A new task was added: <strong class="font-semibold text-slate-800">${task.title}</strong>.</p><p class="text-xs text-slate-500">Created at: ${formatTimestamp(task.createdAt)}.</p></div>`,
       scheduledAt: now,
     });
 

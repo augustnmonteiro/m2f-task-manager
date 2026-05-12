@@ -32,8 +32,8 @@ export async function POST(request: Request) {
     const { tasks: pendingTasks } = await getPendingTasks(supabase, row.user_id);
 
     const body = pendingTasks.length === 0
-      ? 'No pending tasks.'
-      : `Pending tasks:\n${pendingTasks.map((t, i) => `${i + 1}. ${t.title}`).join('\n')}`;
+      ? '<div><p>No pending tasks.</p></div>'
+      : `<div class="space-y-1"><p class="font-medium text-slate-800">Pending tasks:</p><ul class="list-disc pl-5 space-y-1">${pendingTasks.map(t => `<li>${t.title}</li>`).join('')}</ul></div>`;
 
     const { data: updated, error: updateErr } = await supabase
       .from('emails')

@@ -20,7 +20,9 @@ interface Props {
   initialCompleted: Task[];
   hasMoreCompleted: boolean;
   initialEmails: Email[];
+  totalEmailCount: number;
   initialSms: Sms[];
+  totalSmsCount: number;
   hasMoreEmails: boolean;
   hasMoreSms: boolean;
   initialIntervalSeconds: number;
@@ -35,7 +37,9 @@ export function DashboardClient({
   initialCompleted,
   hasMoreCompleted,
   initialEmails,
+  totalEmailCount,
   initialSms,
+  totalSmsCount,
   hasMoreEmails,
   hasMoreSms,
   initialIntervalSeconds,
@@ -43,7 +47,9 @@ export function DashboardClient({
   const [pending, setPending] = useState(initialPending);
   const [completed, setCompleted] = useState(initialCompleted);
   const [emails, setEmails] = useState(initialEmails);
+  const [emailCount, setEmailCount] = useState(totalEmailCount);
   const [smsMessages, setSmsMessages] = useState(initialSms);
+  const [smsCount, setSmsCount] = useState(totalSmsCount);
   const [emailHasMore, setEmailHasMore] = useState(hasMoreEmails);
   const [smsHasMore, setSmsHasMore] = useState(hasMoreSms);
 
@@ -99,6 +105,7 @@ export function DashboardClient({
     };
     emailIdSet.current.add(id);
     setEmails(prev => [mapped, ...prev]);
+    setEmailCount(c => c + 1);
   }, []);
 
   const handleSmsUpdate = useCallback((row: Record<string, unknown>) => {
@@ -118,6 +125,7 @@ export function DashboardClient({
     };
     smsIdSet.current.add(id);
     setSmsMessages(prev => [mapped, ...prev]);
+    setSmsCount(c => c + 1);
   }, []);
 
   const handlePendingLoadMore = useCallback(async (cursor: string): Promise<{ tasks: Task[]; hasMore: boolean }> => {
@@ -224,6 +232,7 @@ export function DashboardClient({
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <EmailPanel
             emails={emails}
+            totalCount={emailCount}
             hasMore={emailHasMore}
             onLoadMore={handleEmailLoadMore}
           />
@@ -231,6 +240,7 @@ export function DashboardClient({
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <SmsPanel
             smsMessages={smsMessages}
+            totalCount={smsCount}
             hasMore={smsHasMore}
             onLoadMore={handleSmsLoadMore}
           />

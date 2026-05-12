@@ -6,11 +6,12 @@ import type { Sms } from '@/lib/schemas/sms';
 
 interface Props {
   smsMessages: Sms[];
+  totalCount: number;
   hasMore: boolean;
   onLoadMore: (cursor: string) => Promise<void>;
 }
 
-export function SmsPanel({ smsMessages, hasMore, onLoadMore }: Props) {
+export function SmsPanel({ smsMessages, totalCount, hasMore, onLoadMore }: Props) {
   const [loading, setLoading] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -41,7 +42,7 @@ export function SmsPanel({ smsMessages, hasMore, onLoadMore }: Props) {
       <div className="flex items-center justify-between">
         <h2 id="sms-heading" className="text-base font-semibold text-slate-900">SMS</h2>
         <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-          {smsMessages.length}
+          {totalCount}
         </span>
       </div>
 

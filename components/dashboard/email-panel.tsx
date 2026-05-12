@@ -6,6 +6,7 @@ import type { Email } from '@/lib/schemas/email';
 
 interface Props {
   emails: Email[];
+  totalCount: number;
   hasMore: boolean;
   onLoadMore: (cursor: string) => Promise<void>;
 }
@@ -25,7 +26,7 @@ function KindBadge({ kind }: { kind: Email['kind'] }) {
   );
 }
 
-export function EmailPanel({ emails, hasMore, onLoadMore }: Props) {
+export function EmailPanel({ emails, totalCount, hasMore, onLoadMore }: Props) {
   const [loading, setLoading] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -56,7 +57,7 @@ export function EmailPanel({ emails, hasMore, onLoadMore }: Props) {
       <div className="flex items-center justify-between">
         <h2 id="emails-heading" className="text-base font-semibold text-slate-900">Emails</h2>
         <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-          {emails.length}
+          {totalCount}
         </span>
       </div>
 
@@ -91,12 +92,11 @@ export function EmailPanel({ emails, hasMore, onLoadMore }: Props) {
               {formatTimestamp(email.createdAt)}
             </p>
             {email.body && (
-              <p
+              <div
                 data-testid={`email-body-${email.id}`}
-                className="text-xs text-slate-600 whitespace-pre-line border-t border-slate-100 pt-2"
-              >
-                {email.body}
-              </p>
+                className="text-xs text-slate-600 border-t border-slate-100 pt-2 prose prose-sm prose-slate max-w-none"
+                dangerouslySetInnerHTML={{ __html: email.body }}
+              />
             )}
             {email.actions.filter(a => !a.usedAt).map(action => (
               <a

@@ -10,13 +10,15 @@ export default async function Page() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <AuthForm />;
 
-  const [pendingResult, completedResult, emailsResult, smsResult, profile, pendingCount] = await Promise.all([
+  const [pendingResult, completedResult, emailsResult, smsResult, profile, pendingCount, emailCount, smsCount] = await Promise.all([
     getPendingTasks(supabase, user.id),
     getCompletedTasks(supabase, user.id),
     getPaginatedSentEmails(supabase, user.id),
     getPaginatedSentSms(supabase, user.id),
     supabase.from('profiles').select('email_summary_interval_seconds').eq('id', user.id).maybeSingle(),
     supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'pending'),
+    supabase.from('emails').select('id', { count: 'exact', head: true }).eq('user_id', user.id).not('sent_at', 'is', null),
+    supabase.from('sms_messages').select('id', { count: 'exact', head: true }).eq('user_id', user.id).not('sent_at', 'is', null),
   ]);
 
   const intervalSec = profile.data?.email_summary_interval_seconds ?? 60;
@@ -31,7 +33,9 @@ export default async function Page() {
       initialCompleted={completedResult.tasks}
       hasMoreCompleted={completedResult.hasMore}
       initialEmails={emailsResult.emails}
+      totalEmailCount={emailCount.count ?? emailsResult.emails.length}
       initialSms={smsResult.smsMessages}
+      totalSmsCount={smsCount.count ?? smsResult.smsMessages.length}
       hasMoreEmails={emailsResult.hasMore}
       hasMoreSms={smsResult.hasMore}
       initialIntervalSeconds={intervalSec}
