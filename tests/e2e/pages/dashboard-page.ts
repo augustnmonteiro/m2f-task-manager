@@ -18,6 +18,9 @@ export class DashboardPage {
 
   async expectVisible() {
     await expect(this.page.getByTestId('dashboard')).toBeVisible();
+    // Reload after login so Supabase Realtime WebSocket connects cleanly.
+    await this.page.reload();
+    await expect(this.page.getByTestId('dashboard')).toBeVisible();
     await expect(this.page.getByTestId('tasks-panel')).toBeVisible();
     await expect(this.page.getByTestId('emails-panel')).toBeVisible();
     await expect(this.page.getByTestId('sms-panel')).toBeVisible();

@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test';
 
 export class TaskPanel {
-  constructor(private readonly page: Page) {}
+  constructor(private readonly page: Page) { }
 
   async addTask(title: string) {
     await this.page.getByTestId('task-title-input').fill(title);
@@ -25,6 +25,10 @@ export class TaskPanel {
     await expect(
       this.page.getByTestId('completed-task-list').getByText(title),
     ).toBeVisible({ timeout: 15_000 });
+  }
+
+  async showCompleted() {
+    await this.page.locator('button:text("Completed")').click();
   }
 
   async completeTaskByTitle(title: string) {

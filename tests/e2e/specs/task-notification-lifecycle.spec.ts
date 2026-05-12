@@ -16,8 +16,12 @@ test('add task → immediate email appears → SMS appears after trigger', async
   await dashboard.tasks.expectPendingTask(title);
 
   await dashboard.triggerNotifications();
+  await page.reload();
   await dashboard.emails.expectImmediateTaskEmail(title);
 
+  // it needs to wait more than 1 minute for the sms to arrive
+  await page.waitForTimeout(60_000);
   await dashboard.triggerNotifications();
+  await page.reload();
   await dashboard.sms.expectSmsContaining(title);
 });

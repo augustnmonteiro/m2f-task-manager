@@ -12,7 +12,11 @@ insert into auth.users (
   raw_user_meta_data,
   is_super_admin,
   role,
-  aud
+  aud,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change
 ) values (
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   '00000000-0000-0000-0000-000000000000',
@@ -25,5 +29,34 @@ insert into auth.users (
   '{}',
   false,
   'authenticated',
-  'authenticated'
+  'authenticated',
+  '',
+  '',
+  '',
+  ''
+) on conflict (id) do update set
+  confirmation_token = '',
+  recovery_token = '',
+  email_change_token_new = '',
+  email_change = '';
+
+-- Identity for the E2E test user (required for Supabase Auth admin API to recognise the user).
+insert into auth.identities (
+  id,
+  user_id,
+  provider_id,
+  provider,
+  identity_data,
+  last_sign_in_at,
+  created_at,
+  updated_at
+) values (
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab',
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  'e2e@test.local',
+  'email',
+  '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","email":"e2e@test.local","email_verified":true,"phone_verified":false}',
+  now(),
+  now(),
+  now()
 ) on conflict (id) do nothing;

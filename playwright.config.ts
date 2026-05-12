@@ -6,13 +6,14 @@ loadEnvConfig(process.cwd());
 export default defineConfig({
   testDir: './tests/e2e/specs',
   fullyParallel: false,
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
-  timeout: 60_000,
+  timeout: 120_000,
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'E2E_TEST_MODE=true npm run dev',
