@@ -11,6 +11,15 @@ export const CompleteTaskInputSchema = z.object({
   taskId: UuidSchema,
 });
 
+export const UpdateTaskInputSchema = z.object({
+  taskId: UuidSchema,
+  title: z.string().trim().min(1, 'Task title is required').max(160),
+});
+
+export const DeleteTaskInputSchema = z.object({
+  taskId: UuidSchema,
+});
+
 export const TaskSchema = z.object({
   id: UuidSchema,
   userId: UuidSchema,
