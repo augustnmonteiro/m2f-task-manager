@@ -126,6 +126,18 @@ export async function getEmailWithActions(
   return toEmailDto(emailRow, mappedActions);
 }
 
+export async function cancelPendingScheduledSummaries(
+  client: Client,
+  userId: string,
+): Promise<void> {
+  await client
+    .from('emails')
+    .delete()
+    .eq('user_id', userId)
+    .eq('kind', 'summary')
+    .is('sent_at', null);
+}
+
 export async function hasPendingScheduledSummary(
   client: Client,
   userId: string,

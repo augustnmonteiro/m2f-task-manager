@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { UpdateEmailSummaryIntervalInputSchema } from '@/lib/schemas/profile';
 import { ok, err, type ActionResult } from '@/lib/result';
+import { cancelPendingScheduledSummaries, insertSummaryEmailRow } from '@/lib/domain/emails';
 
 export async function updateEmailSummaryInterval(
   input: unknown,
@@ -20,5 +21,10 @@ export async function updateEmailSummaryInterval(
     .upsert({ id: user.id, email_summary_interval_seconds: parsed.data.intervalSeconds });
 
   if (error) return err({ code: 'INTERNAL_ERROR', message: 'Failed to update setting.' });
+
+  await cancelPendingScheduledSummaries(supabase, user.id);
+  const nextAt = new Date(Date.now() + parsed.data.intervalSeconds * 1000).toISOString();
+  await insertSummaryEmailRow(supabase, { userId: user.id, scheduledAt: nextAt });
+
   return ok(null);
 }
