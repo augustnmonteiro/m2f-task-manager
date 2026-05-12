@@ -23,6 +23,9 @@ const LIST_ITEM = 'padding:14px 20px;border-top:2px solid #e2e8f0;';
 const ITEM_TITLE = 'margin:0 0 3px;font-weight:600;color:#1e293b;font-size:14px;';
 const EMPTY = 'margin:0;color:#94a3b8;font-size:14px;';
 const DONE_BTN = 'display:inline-block;margin-top:10px;padding:6px 14px;background:#059669;color:white;border-radius:4px;font-size:12px;text-decoration:none;font-weight:600;';
+const MORE = 'padding:12px 20px;border-top:2px solid #e2e8f0;font-size:13px;color:#64748b;font-style:italic;';
+
+const MAX_VISIBLE = 20;
 
 function card(label: string, body: string): string {
   return (
@@ -52,7 +55,10 @@ export function buildEmailHtml(input: EmailInput): string {
     );
   }
 
-  const items = input.tasks
+  const visible = input.tasks.slice(0, MAX_VISIBLE);
+  const remaining = input.tasks.length - visible.length;
+
+  const items = visible
     .map(t =>
       `<li style="${LIST_ITEM}">` +
       `<p style="${ITEM_TITLE}">${t.title}</p>` +
@@ -62,5 +68,9 @@ export function buildEmailHtml(input: EmailInput): string {
     )
     .join('');
 
-  return card('Pending Tasks Summary', `<ul style="${LIST}">${items}</ul>`);
+  const moreFooter = remaining > 0
+    ? `<li style="${MORE}">+ ${remaining} more pending task${remaining === 1 ? '' : 's'}</li>`
+    : '';
+
+  return card('Pending Tasks Summary', `<ul style="${LIST}">${items}${moreFooter}</ul>`);
 }
