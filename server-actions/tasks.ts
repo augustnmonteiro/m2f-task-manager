@@ -14,6 +14,7 @@ import { fibonacciIntervalSeconds } from '@/lib/time/fibonacci';
 import { ok, err, type ActionResult } from '@/lib/result';
 import type { Email } from '@/lib/schemas/email';
 import { formatTimestamp } from '@/lib/time/format';
+import { buildEmailHtml } from '@/lib/email/template';
 
 export async function createTask(
   input: unknown,
@@ -39,7 +40,7 @@ export async function createTask(
       userId: user.id,
       taskId: task.id,
       subject: `Task added: ${task.title}`,
-      body: `<div class="space-y-1"><p>A new task was added: <strong class="font-semibold text-slate-800">${task.title}</strong>.</p><p class="text-xs text-slate-500">Created at: ${formatTimestamp(task.createdAt)}.</p></div>`,
+      body: buildEmailHtml({ type: 'task', title: task.title, createdAt: formatTimestamp(task.createdAt) }),
       scheduledAt: now,
     });
 
