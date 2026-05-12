@@ -71,6 +71,39 @@ export async function insertTask(
   return toTaskDto(data);
 }
 
+export async function updateTaskTitle(
+  client: Client,
+  userId: string,
+  taskId: string,
+  title: string,
+): Promise<Task> {
+  const { data, error } = await client
+    .from('tasks')
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq('id', taskId)
+    .eq('user_id', userId)
+    .eq('status', 'pending')
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('Task not found or not editable');
+  return toTaskDto(data);
+}
+
+export async function deleteTask(
+  client: Client,
+  userId: string,
+  taskId: string,
+): Promise<void> {
+  const { error } = await client
+    .from('tasks')
+    .delete()
+    .eq('id', taskId)
+    .eq('user_id', userId)
+    .eq('status', 'pending');
+  if (error) throw error;
+}
+
 export async function completeTask(
   client: Client,
   userId: string,
