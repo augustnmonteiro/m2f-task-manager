@@ -1,8 +1,19 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { CreateTaskInputSchema, CompleteTaskInputSchema, type Task } from '@/lib/schemas/task';
-import { insertTask, completeTask as completeTaskDomain } from '@/lib/domain/tasks';
+import {
+  CreateTaskInputSchema,
+  CompleteTaskInputSchema,
+  UpdateTaskInputSchema,
+  DeleteTaskInputSchema,
+  type Task,
+} from '@/lib/schemas/task';
+import {
+  insertTask,
+  completeTask as completeTaskDomain,
+  updateTaskTitle,
+  deleteTask as deleteTaskDomain,
+} from '@/lib/domain/tasks';
 import {
   insertImmediateEmail,
   insertSummaryEmailRow,
@@ -97,5 +108,48 @@ export async function completeTask(
     return ok({ task });
   } catch {
     return err({ code: 'INTERNAL_ERROR', message: 'Failed to complete task.' });
+  }
+}
+
+export async function updateTask(
+  input: unknown,
+): Promise<ActionResult<{ task: Task }>> {
+  const parsed = UpdateTaskInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return err({
+      code: 'VALIDATION_ERROR',
+      message: 'Invalid input.',
+      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    });
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return err({ code: 'UNAUTHENTICATED', message: 'Not signed in.' });
+
+  try {
+    const task = await updateTaskTitle(supabase, user.id, parsed.data.taskId, parsed.data.title);
+    return ok({ task });
+  } catch {
+    return err({ code: 'INTERNAL_ERROR', message: 'Failed to update task.' });
+  }
+}
+
+export async function deleteTask(
+  input: unknown,
+): Promise<ActionResult<Record<string, never>>> {
+  const parsed = DeleteTaskInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return err({ code: 'VALIDATION_ERROR', message: 'Invalid task ID.' });
+  }
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return err({ code: 'UNAUTHENTICATED', message: 'Not signed in.' });
+
+  try {
+    await deleteTaskDomain(supabase, user.id, parsed.data.taskId);
+    await cancelPendingTaskSms(supabase, parsed.data.taskId);
+    return ok({});
+  } catch {
+    return err({ code: 'INTERNAL_ERROR', message: 'Failed to delete task.' });
   }
 }
