@@ -24,13 +24,15 @@ type BroadcastMsg = {
 };
 
 export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpdate }: Props) {
-  const supabase = createClient();
   const handlersRef = useRef({ onTaskChange, onEmailUpdate, onSmsUpdate });
   handlersRef.current = { onTaskChange, onEmailUpdate, onSmsUpdate };
 
   useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+    let removeChannel: (() => void) | undefined;
+
     function handleBroadcast(msg: BroadcastMsg) {
-      console.log('[Realtime] broadcast event:', msg);
       const { event, payload } = msg;
       const row = event === 'DELETE' ? (payload.old_record ?? {}) : (payload.record ?? {});
 
@@ -57,16 +59,27 @@ export function RealtimeProvider({ userId, onTaskChange, onEmailUpdate, onSmsUpd
       }
     }
 
-    const channel = supabase
-      .channel(`dashboard:${userId}`, { config: { private: true } })
-      .on('broadcast', { event: 'INSERT' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
-      .on('broadcast', { event: 'UPDATE' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
-      .on('broadcast', { event: 'DELETE' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
-      .subscribe((status, err) => {
-        console.log('[Realtime] status:', status, err ?? '');
-      });
+    // Await the session before subscribing so the JWT is set on the Realtime
+    // socket before the private-channel authorization check fires.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || !session) return;
 
-    return () => { supabase.removeChannel(channel); };
+      const channel = supabase
+        .channel(`dashboard:${userId}`, { config: { private: true } })
+        .on('broadcast', { event: 'INSERT' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
+        .on('broadcast', { event: 'UPDATE' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
+        .on('broadcast', { event: 'DELETE' }, (msg) => handleBroadcast(msg as unknown as BroadcastMsg))
+        .subscribe((status, err) => {
+          if (err) console.error('[Realtime] error:', err);
+        });
+
+      removeChannel = () => supabase.removeChannel(channel);
+    });
+
+    return () => {
+      active = false;
+      removeChannel?.();
+    };
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
