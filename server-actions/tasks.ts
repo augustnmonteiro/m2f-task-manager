@@ -15,6 +15,7 @@ import { ok, err, type ActionResult } from '@/lib/result';
 import type { Email } from '@/lib/schemas/email';
 import { formatTimestamp } from '@/lib/time/format';
 import { buildEmailHtml } from '@/lib/email/template';
+import { signTaskJwt } from '@/lib/email/jwt';
 
 export async function createTask(
   input: unknown,
@@ -36,11 +37,14 @@ export async function createTask(
     const task = await insertTask(supabase, user.id, parsed.data.title);
     const now = new Date().toISOString();
 
+    const jwt = await signTaskJwt(user.id, task.id);
+    const actionUrl = `/api/email-actions/complete-task-jwt?token=${jwt}`;
+
     const email = await insertImmediateEmail(supabase, {
       userId: user.id,
       taskId: task.id,
       subject: `Task added: ${task.title}`,
-      body: buildEmailHtml({ type: 'task', title: task.title, createdAt: formatTimestamp(task.createdAt) }),
+      body: buildEmailHtml({ type: 'task', title: task.title, createdAt: formatTimestamp(task.createdAt), actionUrl }),
       scheduledAt: now,
     });
 

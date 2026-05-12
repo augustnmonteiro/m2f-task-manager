@@ -6,6 +6,7 @@ import { insertSummaryEmailRow } from '@/lib/domain/emails';
 import { updateAfterEmailSummary } from '@/lib/domain/scheduler';
 import { buildEmailHtml } from '@/lib/email/template';
 import { formatTimestamp } from '@/lib/time/format';
+import { signTaskJwt } from '@/lib/email/jwt';
 
 function verifyCronAuth(request: Request): boolean {
   const auth = request.headers.get('authorization');
@@ -33,10 +34,17 @@ export async function POST(request: Request) {
   for (const row of dueRows ?? []) {
     const { tasks: pendingTasks } = await getPendingTasks(supabase, row.user_id);
 
-    const body = buildEmailHtml({
-      type: 'digest',
-      tasks: pendingTasks.map(t => ({ title: t.title, createdAt: formatTimestamp(t.createdAt) })),
-    });
+    const tasksWithUrls = await Promise.all(
+      pendingTasks.map(async t => {
+        const jwt = await signTaskJwt(row.user_id, t.id);
+        return {
+          title: t.title,
+          createdAt: formatTimestamp(t.createdAt),
+          actionUrl: `/api/email-actions/complete-task-jwt?token=${jwt}`,
+        };
+      })
+    );
+    const body = buildEmailHtml({ type: 'digest', tasks: tasksWithUrls });
 
     const { data: updated, error: updateErr } = await supabase
       .from('emails')
