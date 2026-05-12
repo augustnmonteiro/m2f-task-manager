@@ -1,4 +1,4 @@
-# Task Notifier SPA
+# Task Notifier
 
 A real-time, authenticated task dashboard that records tasks and simulates automated Email and SMS notifications in visible inbox-style panels.
 
