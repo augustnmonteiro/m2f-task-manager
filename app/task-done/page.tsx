@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 type Props = { searchParams: Promise<{ status?: string }> };
 
 export default async function TaskDonePage({ searchParams }: Props) {
@@ -11,7 +13,7 @@ export default async function TaskDonePage({ searchParams }: Props) {
     <main style={{ fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '12px', padding: '24px' }}>
       <p style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b', margin: 0 }}>{heading}</p>
       <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>{detail}</p>
-      <a href="/" style={{ marginTop: '8px', fontSize: '13px', color: '#059669', textDecoration: 'none', fontWeight: 500 }}>Back to dashboard</a>
+      <Link href="/" style={{ marginTop: '8px', fontSize: '13px', color: '#059669', textDecoration: 'none', fontWeight: 500 }}>Back to dashboard</Link>
     </main>
   );
 }
