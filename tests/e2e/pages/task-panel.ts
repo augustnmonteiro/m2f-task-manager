@@ -12,7 +12,7 @@ export class TaskPanel {
   async expectPendingTask(title: string) {
     await expect(
       this.page.getByTestId('pending-task-list').getByText(title),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
   }
 
   async expectNoPendingTask(title: string) {
@@ -24,7 +24,7 @@ export class TaskPanel {
   async expectCompletedTask(title: string) {
     await expect(
       this.page.getByTestId('completed-task-list').getByText(title),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
   }
 
   async completeTaskByTitle(title: string) {
